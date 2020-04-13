@@ -9,19 +9,17 @@ def emg_decompostion(original_signal, moving_avg):
     signal = np.copy(original_signal)
 
     # Rectify signal (absloute value)
-    signal[np.where(signal < 0)] = signal[np.where(signal < 0)] * -1
-
     signal_after_rectify = np.copy(signal)
+    signal_after_rectify[np.where(signal_after_rectify < 0)] = signal[np.where(signal < 0)] * -1
 
     # Set threshold
-    threshold = 3 * np.std(signal[0:285])
+    threshold = 3 * np.std(signal[0:280])
 
     # Moving Average
     signalTemp = np.zeros(signal.shape)
     for i in range(moving_avg,signal.shape[0]):
-        signalTemp[i] = np.sum(signal[i-moving_avg+1:i+1]) / moving_avg
-    signal_after_average = signalTemp
-
+        signalTemp[i] = np.sum(signal_after_rectify[i-moving_avg:i]) / moving_avg
+    signal_after_average = np.copy(signalTemp)
 
     # Detect MUAP
     doSkip = False
@@ -37,11 +35,11 @@ def emg_decompostion(original_signal, moving_avg):
             else:
                 doSkip = False
                 
-        tmp = signal_after_average[i:i+moving_avg+1] 
+        tmp = signal_after_average[i:i+moving_avg] 
         isMUAP = all(tmp > threshold)
         if(isMUAP):
             muapTimestamps.append(i)
-            tmp = signal[i:i+moving_avg+1] 
+            tmp = signal[i:i+moving_avg] 
 
             if (len(muTemplates) == 0):
                 muTemplates.append(tmp)
@@ -76,10 +74,9 @@ def emg_decompostion(original_signal, moving_avg):
                 max = signal[j]
                 maxIndex = j
         muapPeaks.append(maxIndex)
-            
-
 
     return signal, signal_after_average, signal_after_rectify, muapPeaks, muTemplates
+
 
 original_signal = read_file('Data.txt')
 emg, signal_avg, signal_rectify, timestamps, templates = emg_decompostion(original_signal,20)
