@@ -20,9 +20,8 @@ def emg_decompostion(original_signal, moving_avg):
     signalTemp = np.zeros(signal.shape)
     for i in range(moving_avg,signal.shape[0]):
         signalTemp[i] = np.sum(signal[i-moving_avg+1:i+1]) / moving_avg
-    signal = signalTemp
+    signal_after_average = signalTemp
 
-    signal_after_average = np.copy(signal)
 
     # Detect MUAP
     doSkip = False
@@ -33,15 +32,16 @@ def emg_decompostion(original_signal, moving_avg):
     for i in range(0,signal.shape[0]):
         # Skip detection checking when still in the range of the previous MUAP (wait till signal is less than threshold)
         if doSkip:
-            if signal[i] > threshold:
+            if signal_after_average[i] > threshold:
                 continue
             else:
                 doSkip = False
                 
-        tmp = signal[i:i+moving_avg+1] 
+        tmp = signal_after_average[i:i+moving_avg+1] 
         isMUAP = all(tmp > threshold)
         if(isMUAP):
             muapTimestamps.append(i)
+            tmp = signal[i:i+moving_avg+1] 
 
             if (len(muTemplates) == 0):
                 muTemplates.append(tmp)
@@ -64,13 +64,22 @@ def emg_decompostion(original_signal, moving_avg):
                     
             
             i += moving_avg
-            if signal[i] > threshold:
+            if signal_after_average[i] > threshold:
                 doSkip = True
         
+    muapPeaks = []
+    for i in range(len(muapTimestamps)):
+        max = signal[muapTimestamps[i]]
+        maxIndex = muapTimestamps[i]
+        for j in range(muapTimestamps[i], muapTimestamps[i]+moving_avg):
+            if(signal[j] > max):
+                max = signal[j]
+                maxIndex = j
+        muapPeaks.append(maxIndex)
+            
 
 
-
-    return signal, signal_after_average, signal_after_rectify, muapTimestamps, muTemplates
+    return signal, signal_after_average, signal_after_rectify, muapPeaks, muTemplates
 
 original_signal = read_file('Data.txt')
 emg, signal_avg, signal_rectify, timestamps, templates = emg_decompostion(original_signal,20)
