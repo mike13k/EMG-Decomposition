@@ -13,7 +13,7 @@ def emg_decompostion(original_signal, moving_avg):
     signal_after_rectify[np.where(signal_after_rectify < 0)] = signal[np.where(signal < 0)] * -1
 
     # Set threshold
-    threshold = 3 * np.std(signal[0:100])
+    threshold = 3 * np.std(signal_after_rectify[0:100])
 
     # Moving Average
     signalTemp = np.zeros(signal.shape)
@@ -42,7 +42,7 @@ def emg_decompostion(original_signal, moving_avg):
             muapTimestamps.append(i)
             detection_signal[i] = signal[i]
             
-            peak_index = np.where(signal[i-moving_avg+1:i+2] == np.max(signal[i-moving_avg+1:i+2]))[0][0]
+            peak_index = np.where(signal[i-moving_avg+1:i+moving_avg] == np.max(signal[i-moving_avg+1:i+moving_avg]))[0][0]
             peak_shift = peak_index - int(moving_avg / 2)
             tmp = np.copy(signal[i-moving_avg+peak_shift+1:i+peak_shift+1])
 
@@ -84,24 +84,24 @@ def emg_decompostion(original_signal, moving_avg):
 start = 30000
 end = 35000
 original_signal = read_file('Data.txt')
-detection_signal, signal_avg, signal_rectify, timestamps, templates, classes = emg_decompostion(original_signal[start:end],20)
+detection_signal, signal_avg, signal_rectify, timestamps, templates, classes = emg_decompostion(original_signal,20)
 
 
-# # Draw Templates
-# fig, x = plt.subplots(len(templates),1)
-# for i in range(len(templates)):
-#     x[i].plot(templates[i])
-# plt.show()
+# Draw Templates
+fig, x = plt.subplots(len(templates),1)
+for i in range(len(templates)):
+    x[i].plot(templates[i])
+plt.show()
 
 # Draw detections
 plt.plot(original_signal[start:end])
-# timestamps = timestamps[np.where(timestamps >= start)]
-# timestamps = timestamps[np.where(timestamps <= end)]
-# classes = classes[np.where(timestamps >= start)]
-# classes = classes[np.where(timestamps <= end)]
+timestamps = timestamps[np.where(timestamps >= start)]
+timestamps = timestamps[np.where(timestamps <= end)]
+classes = classes[np.where(timestamps >= start)]
+classes = classes[np.where(timestamps <= end)]
 for i in range(len(templates)):
-    plt.plot(timestamps[np.where(classes == i)[0]], np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
-    # plt.plot(timestamps[np.where(classes == i)[0]] - start, np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
+    # plt.plot(timestamps[np.where(classes == i)[0]], np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
+    plt.plot(timestamps[np.where(classes == i)[0]] - start, np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
 plt.show()
 
 
