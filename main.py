@@ -18,7 +18,7 @@ def emg_decompostion(original_signal, moving_avg):
     # Moving Average
     signalTemp = np.zeros(signal.shape)
     for i in range(moving_avg,signal.shape[0]):
-        signalTemp[i] = np.sum(signal_after_rectify[i-moving_avg:i]) / moving_avg
+        signalTemp[i] = np.sum(signal_after_rectify[i-moving_avg+1:i+1]) / moving_avg
     signal_after_average = np.copy(signalTemp)
 
     # Detect MUAP
