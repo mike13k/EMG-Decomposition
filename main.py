@@ -42,9 +42,9 @@ def emg_decompostion(original_signal, moving_avg):
             muapTimestamps.append(i)
             detection_signal[i] = signal[i]
             
-            peak_index = np.where(signal[i-moving_avg+1:i+moving_avg] == np.max(signal[i-moving_avg+1:i+moving_avg]))[0][0]
+            peak_index = np.where(signal[i:i+moving_avg] == np.max(signal[i:i+moving_avg]))[0][0]
             peak_shift = peak_index - int(moving_avg / 2)
-            tmp = np.copy(signal[i-moving_avg+peak_shift+1:i+peak_shift+1])
+            tmp = np.copy(signal[i+peak_shift:i+moving_avg+peak_shift])
 
             if (len(muTemplates) == 0):
                 muTemplates.append(tmp)
