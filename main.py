@@ -13,7 +13,8 @@ def emg_decompostion(original_signal, moving_avg):
     signal_after_rectify[np.where(signal_after_rectify < 0)] = signal[np.where(signal < 0)] * -1
 
     # Set threshold
-    threshold = 3 * np.std(signal_after_rectify[0:100])
+    threshold = 3 * np.std(signal_after_rectify[0:123])
+    # print(threshold)
 
     # Moving Average
     signalTemp = np.zeros(signal.shape)
@@ -51,17 +52,21 @@ def emg_decompostion(original_signal, moving_avg):
                 muapClasses.append(0)
             else:
                 classified = False
+                D = 12.65 ** 5
                 for j in range(len(muTemplates)):
                     currTemplate = np.copy(muTemplates[j])
+                    pre_D = D
                     D = np.sum((tmp - currTemplate) ** 2)
-                    if(D < (12.65 ** 5)):
-                        muapClasses.append(j)
+                    if(D < (12.65 ** 5) and D < pre_D):
+                        template_index = j
                         classified = True
-                        currTemplate = (currTemplate + tmp)/2
-                        muTemplates[j] = currTemplate  #Update the template
-                        break
-                        
-                if(not(classified)):  #create a new template in muTemplates
+                
+                if(classified):
+                    currTemplate = np.copy(muTemplates[template_index])                
+                    muapClasses.append(template_index)
+                    currTemplate = (currTemplate + tmp)/2
+                    muTemplates[template_index] = np.copy(currTemplate)  #Update the template   
+                else:  #create a new template in muTemplates
                     muapClasses.append(len(muTemplates))
                     muTemplates.append(tmp)
             
@@ -81,14 +86,13 @@ def emg_decompostion(original_signal, moving_avg):
     return detection_signal, signal_after_average, signal_after_rectify, np.array(muapTimestamps), muTemplates, np.array(muapClasses)
 
 
-start = 30000
-end = 35000
 original_signal = read_file('Data.txt')
 detection_signal, signal_avg, signal_rectify, timestamps, templates, classes = emg_decompostion(original_signal,20)
-
+start = 30000
+end = 35000
 
 # Draw Templates
-fig, x = plt.subplots(len(templates),1)
+fig, x = plt.subplots(1,len(templates))
 for i in range(len(templates)):
     x[i].plot(templates[i])
 plt.show()
@@ -97,11 +101,15 @@ plt.show()
 plt.plot(original_signal[start:end])
 timestamps = timestamps[np.where(timestamps >= start)]
 timestamps = timestamps[np.where(timestamps <= end)]
+# print(len(timestamps))
 classes = classes[np.where(timestamps >= start)]
 classes = classes[np.where(timestamps <= end)]
 for i in range(len(templates)):
     # plt.plot(timestamps[np.where(classes == i)[0]], np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
-    plt.plot(timestamps[np.where(classes == i)[0]] - start, np.ones(timestamps[np.where(classes == i)[0]].shape) * 900, "*")
+    plt.plot(timestamps[np.where(classes == i)[0]] - start, np.ones(timestamps[np.where(classes == i)[0]].shape) *
+    900,
+    # original_signal[timestamps[np.where(classes == i)[0]]],
+    "*")
 plt.show()
 
 
