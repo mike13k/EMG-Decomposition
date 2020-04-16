@@ -57,7 +57,7 @@ def emg_decompostion(original_signal, moving_avg):
                     currTemplate = np.copy(muTemplates[j])
                     pre_D = D
                     D = np.sum((tmp - currTemplate) ** 2)
-                    if(D < (12.65 ** 5) and D < pre_D):
+                    if(D < (12 ** 5) and D < pre_D):
                         template_index = j
                         classified = True
                 
@@ -101,7 +101,7 @@ plt.show()
 plt.plot(original_signal[start:end])
 timestamps = timestamps[np.where(timestamps >= start)]
 timestamps = timestamps[np.where(timestamps <= end)]
-# print(len(timestamps))
+print(len(timestamps))
 classes = classes[np.where(timestamps >= start)]
 classes = classes[np.where(timestamps <= end)]
 for i in range(len(templates)):
