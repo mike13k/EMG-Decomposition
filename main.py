@@ -101,7 +101,7 @@ plt.show()
 plt.plot(original_signal[start:end])
 timestamps = timestamps[np.where(timestamps >= start)]
 timestamps = timestamps[np.where(timestamps <= end)]
-print(len(timestamps))
+# print(len(timestamps))
 classes = classes[np.where(timestamps >= start)]
 classes = classes[np.where(timestamps <= end)]
 for i in range(len(templates)):
